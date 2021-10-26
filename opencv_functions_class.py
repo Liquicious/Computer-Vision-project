@@ -2,10 +2,16 @@ import cv2
 import numpy as np
 
 
+list_of_cells = {'Head': False, 'Q1': False, 'Ans1': True, 'Q2': False, 'Ans2': True, 'Q3': False,'Ans3': True,
+                 'Q4': False, 'Ans4': True, 'Q5': False, 'Ans5': True, 'Q6': False, 'Ans6': True,
+                 'Q7': False, 'Ans7': True}
+
+
 class OpencvImage:
     def __init__(self, image_file):
         self.image = image_file
         self.border = None
+        self.cells = list_of_cells
 
     def show(self):
         cv2.imshow('0', self.image)
