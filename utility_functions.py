@@ -5,10 +5,12 @@ from opencv_functions_class import OpencvFunctions
 
 class UtilityFunctions(OpencvFunctions):
     def show(self):
+        """Вывод изображения"""
         cv2.imshow('0', self.image)
         cv2.waitKey(0)
 
     def show_borders(self):
+        """Вывод изображения с выделенными границами ячеек таблицы"""
         if self.borders is None:
             print("borders weren't created yet")
         else:
