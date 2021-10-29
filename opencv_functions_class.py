@@ -22,7 +22,13 @@ class OpencvFunctions:
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
         _, img_bin = cv2.threshold(gray, 128, 255, cv2.THRESH_BINARY_INV)
         cords = np.column_stack(np.where(img_bin == 255))
-        angle = 90 - cv2.minAreaRect(cords)[-1]
+        angle = cv2.minAreaRect(cords)[-1]
+
+        if angle < 45:
+            angle = -angle
+        else:
+            angle = 90 - angle
+
         (h, w) = self.image.shape[:2]
         center = (w // 2, h // 2)
         rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
