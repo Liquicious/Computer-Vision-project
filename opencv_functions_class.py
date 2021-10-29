@@ -7,15 +7,11 @@ list_of_cells = {'Head': False, 'Q1': False, 'Ans1': True, 'Q2': False, 'Ans2': 
                  'Q7': False, 'Ans7': True}
 
 
-class OpencvImage:
+class OpencvFunctions:
     def __init__(self, image_file):
         self.image = image_file
-        self.border = None
+        self.borders = None
         self.cells = list_of_cells
-
-    def show(self):
-        cv2.imshow('0', self.image)
-        cv2.waitKey(0)
 
     def load(self):
         self.image = cv2.imread(self.image)
@@ -23,8 +19,8 @@ class OpencvImage:
     def normalize(self):
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
         _, img_bin = cv2.threshold(gray, 128, 255, cv2.THRESH_BINARY_INV)
-        coords = np.column_stack(np.where(img_bin == 255))
-        angle = 90 - cv2.minAreaRect(coords)[-1]
+        cords = np.column_stack(np.where(img_bin == 255))
+        angle = 90 - cv2.minAreaRect(cords)[-1]
         (h, w) = self.image.shape[:2]
         center = (w // 2, h // 2)
         rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
@@ -49,19 +45,21 @@ class OpencvImage:
         structuring_element = np.ones((3, 3), np.uint8)
         merge_image = horizontal_lines + vertical_lines
         merge_image = cv2.dilate(merge_image, structuring_element, iterations=2)
-        self.border = merge_image
+        self.borders = merge_image
 
 
-img = OpencvImage("res/csv.jpg")
+if __name__ == "__main__":
+    # не актуальные тесты, сейчас надо запускать файл utility_functions
+    img = OpencvFunctions("res/csv.jpg")
 
-img.load()
-img.show()
+    img.load()
+    # img.show() - такой функции в этом классе уже нет
 
-img.normalize()
-img.show()
+    img.normalize()
+    # img.show()
 
-hor, ver = img.extract_lines()
-img.merge_lines(hor, ver)
+    hor, ver = img.extract_lines()
+    img.merge_lines(hor, ver)
 
-cv2.imshow('0', img.border)
-cv2.waitKey(0)
+    cv2.imshow('0', img.borders)
+    cv2.waitKey(0)
