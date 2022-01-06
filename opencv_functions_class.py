@@ -1,17 +1,17 @@
 import cv2
 import numpy as np
-
-
-list_of_cells = {'Head': False, 'Q1': False, 'Ans1': True, 'Q2': False, 'Ans2': True, 'Q3': False, 'Ans3': True,
-                 'Q4': False, 'Ans4': True, 'Q5': False, 'Ans5': True, 'Q6': False, 'Ans6': True,
-                 'Q7': False, 'Ans7': True}
+import itertools
 
 
 class OpencvFunctions:
     def __init__(self, image_file):
-        self.image = image_file
+        self.dots = None
+        self.rects_coords = None
+        self.image = cv2.imread(image_file)
+        self.height, self.width = self.image.shape[:2]
         self.borders = None
-        self.cells = list_of_cells
+        self.gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+        _, self.image_bin = cv2.threshold(self.gray, 128, 255, cv2.THRESH_BINARY_INV)
 
     def load(self):
         """Загружает изображение"""
@@ -36,41 +36,43 @@ class OpencvFunctions:
                                  borderMode=cv2.BORDER_REPLICATE)
         self.image = rotated
 
-    def extract_lines(self):
-        """Выделение линий таблицы из изображения"""
+    def get_coords(self):
+        """Определение координат ячеек"""
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
         _, img_bin = cv2.threshold(gray, 128, 255, cv2.THRESH_BINARY_INV)
         # Выделяем горизонтальные линии при помощи ядра 1x50(горизонтальная линия)
         structuring_element = np.ones((1, 50), np.uint8)
         erode_image = cv2.erode(img_bin, structuring_element, iterations=1)
-        hor_dilate_image = cv2.dilate(erode_image, structuring_element, iterations=1)
+        hor = cv2.dilate(erode_image, structuring_element, iterations=1)
         # Выделяем вертикальные линии при помощи ядра 50x1(вертикальная линия)
         structuring_element = np.ones((50, 1), np.uint8)
         erode_image = cv2.erode(img_bin, structuring_element, iterations=1)
-        ver_dilate_image = cv2.dilate(erode_image, structuring_element, iterations=1)
+        ver = cv2.dilate(erode_image, structuring_element, iterations=1)
+        # Применяем бинарное умножение  вертикальных и горизонтальных линий для получения точек пересечения
+        self.dots = cv2.bitwise_and(ver, hor)
 
-        return hor_dilate_image,  ver_dilate_image
+        coords = []
 
-    def merge_lines(self, horizontal_lines, vertical_lines):
-        """Объединение выделенных линий таблицы в одно изображение"""
-        structuring_element = np.ones((3, 3), np.uint8)
-        merge_image = horizontal_lines + vertical_lines
-        merge_image = cv2.dilate(merge_image, structuring_element, iterations=2)
-        self.borders = merge_image
+        # Определяем координаты точек пересечения
+        for y in range(self.height):
+            for x in range(self.width):
+                if (self.dots[y][x] == 255):
+                    coords.append((x, y))
 
+        coords.pop(-1)
 
-if __name__ == "__main__":
-    # не актуальные тесты, сейчас надо запускать файл utility_functions
-    img = OpencvFunctions("res/csv.jpg")
+        self.rects_coords = []
 
-    img.load()
-    # img.show() - такой функции в этом классе уже нет
+        # Для каждой ячейки берем правый верхний и левый нижний угол по координатам
+        for i in range(0, len(coords) - 1, 2):
+            self.rects_coords.append((coords[i], coords[i + 1]))
 
-    img.normalize()
-    # img.show()
-
-    hor, ver = img.extract_lines()
-    img.merge_lines(hor, ver)
-
-    cv2.imshow('0', img.borders)
-    cv2.waitKey(0)
+    def show_cells(self):
+        """Вывод каждой ячейки"""
+        for x in self.rects_coords:
+            if(x[1][0] < x[0][0]):
+                crop_img = self.image[x[0][1]:x[1][1], x[1][0]:x[0][0]]
+            else:
+                crop_img = self.image[x[0][1]:x[1][1], x[0][0]:x[1][0]]
+            cv2.imshow('0', crop_img)
+            cv2.waitKey(0)
