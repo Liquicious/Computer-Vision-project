@@ -84,9 +84,11 @@ class OpencvFunctions:
             cv2.imshow('0', crop_img)
             cv2.waitKey(0)
 
-            custom_config = r'--oem 3 --psm 6 outputbase digits'
-            result = pytesseract.image_to_string(crop_img, config=custom_config)
-            if result:
-                print(result[0])
-            else:
-                print("Not identified")
+            # custom_config = r'--oem 3 --psm 6 outputbase digits'
+            # result = pytesseract.image_to_string(crop_img, config=custom_config)
+            # if result:
+            #    print('---------------------------')
+            #    print(result)
+            #    print('---------------------------')
+            # else:
+            #    print("Not identified")

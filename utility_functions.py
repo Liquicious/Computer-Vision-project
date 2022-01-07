@@ -12,7 +12,7 @@ class UtilityFunctions(OpencvFunctions):
 
 
 if __name__ == "__main__":
-    img = UtilityFunctions("res/csv6.jpg")
+    img = UtilityFunctions("res/csv7.jpg")
     img.show()
     img.normalize()
     img.show()
