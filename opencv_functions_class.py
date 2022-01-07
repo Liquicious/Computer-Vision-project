@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import itertools
+import pytesseract
 
 
 class OpencvFunctions:
@@ -56,7 +57,7 @@ class OpencvFunctions:
         # Определяем координаты точек пересечения
         for y in range(self.height):
             for x in range(self.width):
-                if (self.dots[y][x] == 255):
+                if self.dots[y][x] == 255:
                     coords.append((x, y))
 
         coords.pop(-1)
@@ -70,9 +71,22 @@ class OpencvFunctions:
     def show_cells(self):
         """Вывод каждой ячейки"""
         for x in self.rects_coords:
-            if(x[1][0] < x[0][0]):
+            if x[1][0] < x[0][0]:
                 crop_img = self.image[x[0][1]:x[1][1], x[1][0]:x[0][0]]
             else:
                 crop_img = self.image[x[0][1]:x[1][1], x[0][0]:x[1][0]]
+
+            crop_img = cv2.threshold(crop_img, 170, 255, cv2.THRESH_BINARY_INV)[1]
+            kernel = np.ones((2, 2), np.uint8)
+            crop_img = cv2.dilate(crop_img, kernel, iterations=2)
+            crop_img = cv2.bitwise_not(crop_img)
+
             cv2.imshow('0', crop_img)
             cv2.waitKey(0)
+
+            custom_config = r'--oem 3 --psm 6 outputbase digits'
+            result = pytesseract.image_to_string(crop_img, config=custom_config)
+            if result:
+                print(result[0])
+            else:
+                print("Not identified")
