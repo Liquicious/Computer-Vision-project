@@ -70,6 +70,7 @@ class OpencvFunctions:
 
     def show_cells(self):
         """Вывод каждой ячейки"""
+        i = 0
         for x in self.rects_coords:
             if x[1][0] < x[0][0]:
                 crop_img = self.image[x[0][1]:x[1][1], x[1][0]:x[0][0]]
@@ -81,8 +82,8 @@ class OpencvFunctions:
             crop_img = cv2.dilate(crop_img, kernel, iterations=2)
             crop_img = cv2.bitwise_not(crop_img)
 
-            cv2.imshow('0', crop_img)
-            cv2.waitKey(0)
+            cv2.imwrite(f"res/cells/cell{i}.jpg", crop_img)
+            i += 1
 
             # custom_config = r'--oem 3 --psm 6 outputbase digits'
             # result = pytesseract.image_to_string(crop_img, config=custom_config)
